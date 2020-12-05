@@ -125,9 +125,9 @@ enum BlockFlag : char {
 
   typedef struct {
     power_status_t status;    // See planner settings for meaning
-    uint8_t power;            // Ditto; When in trapezoid mode this is nominal power
+    float power;            // Ditto; When in trapezoid mode this is nominal power
     #if ENABLED(LASER_POWER_INLINE_TRAPEZOID)
-      uint8_t   power_entry;  // Entry power for the laser
+      float   power_entry;  // Entry power for the laser
       #if DISABLED(LASER_POWER_INLINE_TRAPEZOID_CONT)
         uint8_t   power_exit; // Exit power for the laser
         uint32_t  entry_per,  // Steps per power increment (to avoid floats in stepper calcs)
@@ -253,7 +253,7 @@ typedef struct block_t {
      * Using OCR instead of raw power, because it avoids
      * floating point operations during the move loop.
      */
-    uint8_t power;
+    cutter_power_t power;
   } laser_state_t;
 #endif
 

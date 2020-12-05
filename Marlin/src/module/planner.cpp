@@ -850,7 +850,7 @@ void Planner::calculate_trapezoid_for_block(block_t* const block, const float &e
    */
   #if ENABLED(LASER_POWER_INLINE_TRAPEZOID)
     if (block->laser.power > 0) { // No need to care if power == 0
-      const uint8_t entry_power = block->laser.power * entry_factor; // Power on block entry
+      const float entry_power = block->laser.power * entry_factor; // Power on block entry
       #if DISABLED(LASER_POWER_INLINE_TRAPEZOID_CONT)
         // Speedup power
         const uint8_t entry_power_diff = block->laser.power - entry_power;

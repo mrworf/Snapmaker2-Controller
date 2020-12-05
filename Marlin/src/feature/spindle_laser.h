@@ -48,8 +48,17 @@ class SpindleLaser {
 public:
   static constexpr float min_pct = 0, max_pct = 100;
   static uint8_t pct_to_ocr(const float pct) {
-    if (laser.IsOnline())
-      return pct <= 1 ? uint8_t(round(pct * 20)) : 20 + uint8_t(round((pct-1) * 235 / 99));
+    if (laser.IsOnline()) {
+      int   integer;
+      float decimal;
+
+      integer = (int)pct;
+      decimal = pct - integer;
+
+      return (uint8_t)(power_table[integer] + (power_table[integer + 1] - power_table[integer]) * decimal);
+
+      //  return pct <= 1 ? uint8_t(round(pct * 20)) : 20 + uint8_t(round((pct-1) * 235 / 99));
+    }
     return uint8_t(round(pct));
   }
 
@@ -204,7 +213,7 @@ public:
           planner.laser_inline.power = upower_to_ocr(upwr);
           isReady = true;
         #else
-          inline_ocr_power(upower_to_ocr(upwr));
+          inline_ocr_power(upwr);
         #endif
       #else
         planner.laser_inline.status.isEnabled = enabled(upwr);
@@ -216,7 +225,7 @@ public:
     static inline void inline_direction(const bool) { /* never */ }
 
     #if ENABLED(SPINDLE_LASER_PWM)
-      static inline void inline_ocr_power(const uint8_t ocrpwr) {
+      static inline void inline_ocr_power(const cutter_power_t ocrpwr) {
         isReady = ocrpwr > 0;
         planner.laser_inline.status.isEnabled = ocrpwr > 0;
         planner.laser_inline.power = ocrpwr;
