@@ -207,6 +207,7 @@ public:
     // Set the power for subsequent movement blocks
     static void inline_power(const cutter_power_t upwr) {
       unitPower = menuPower = upwr;
+      laser.CheckFan(upwr); // Prevent turning on the fan from the ISR initially.
       #if ENABLED(SPINDLE_LASER_PWM)
         #if ENABLED(SPEED_POWER_RELATIVE) && !CUTTER_UNIT_IS(RPM) // relative mode does not turn laser off at 0, except for RPM
           planner.laser_inline.status.isEnabled = true;

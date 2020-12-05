@@ -136,8 +136,9 @@ class ToolHeadLaser: public ModuleBase {
 
     ToolHeadLaserState state() { return state_; }
 
-  private:
+  public:
     void    CheckFan(uint16_t pwm);
+  private:
     ErrCode LoadFocus();
     ErrCode ReadBluetoothInfo(LaserCameraCommand cmd, uint8_t *out, uint16_t &length);
     ErrCode SetBluetoothInfo(LaserCameraCommand cmd, uint8_t *info, uint16_t length);
