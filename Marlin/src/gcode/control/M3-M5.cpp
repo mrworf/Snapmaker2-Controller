@@ -68,8 +68,10 @@
  */
 void GcodeSuite::M3_M4(const bool is_M4) {
   auto get_s_power = [] {
-    if (parser.seenval('S') || parser.seenval('P')) {
-      const float spwr = parser.value_float();
+    bool seenS = parser.seenval('S'); // Order matters, value pointer set to last value
+    bool seenP = parser.seenval('P'); // which will be P if present
+    if (seenS || seenP) {
+      const float spwr = parser.value_float() * (seenP ? 1.0f : 100.0f / 255.0f);
       cutter.unitPower = TERN(SPINDLE_LASER_PWM,
                               cutter.power_to_range(cutter_power_t(spwr)),
                               spwr > 0 ? 255 : 0);
