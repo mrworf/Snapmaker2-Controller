@@ -190,8 +190,10 @@ void GcodeSuite::get_destination_from_command() {
 
   #if ENABLED(LASER_MOVE_POWER)
     // Set the laser power in the planner to configure this move
-    if (parser.seen('S') || parser.seen('P')) {
-      const float spwr = parser.value_float();
+    bool seenS = parser.seenval('S'); // Order matters, value pointer set to last value
+    bool seenP = parser.seenval('P'); // which will be P if present
+    if (seenS || seenP) {
+      const float spwr = parser.value_float() * (seenP ? 1.0f : 100.0f / 255.0f);
       cutter.inline_power(TERN(SPINDLE_LASER_PWM, cutter.upower_to_ocr(cutter.power_to_range(cutter_power_t(spwr))), spwr > 0 ? 255 : 0));
     }
     else if (ENABLED(LASER_MOVE_G0_OFF) && parser.codenum == 0) // G0
