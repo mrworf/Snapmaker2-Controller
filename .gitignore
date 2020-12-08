@@ -174,3 +174,9 @@ cmake-build-*
 
 #SourceInsight
 Edit/
+
+#Firmware Packer
+firmware-pack/*
+!firmware-pack/package-firmware.bat
+!firmware-pack/package.exe
+!firmware-pack/update.exe
