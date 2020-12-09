@@ -1,0 +1,17 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Package Firmware",
+			"dependsOn": [
+				"PlatformIO: Build"
+			],
+			"type": "shell",
+			"command": ".\\firmware-pack\\package-firmware.bat",
+			"args": [
+				".pio\\build\\GD32F105\\firmware.bin"
+			],
+			"problemMatcher": []
+		}
+	]
+}
