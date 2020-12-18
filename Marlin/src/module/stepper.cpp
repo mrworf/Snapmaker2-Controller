@@ -245,6 +245,7 @@ xyze_int8_t Stepper::count_direction{0};
     .enabled = false,
     .cur_power = 0,
     .cruise_set = false,
+    .min_power = TERN0(LASER_POWER_INLINE_DOT_ALWAYS_VISIBLE, cutter.upower_to_ocr(cutter.cpwr_to_upwr(LASER_POWER_INLINE_TRAPEZOID_MINIMUM_POWER))),
     #if DISABLED(LASER_POWER_INLINE_TRAPEZOID_CONT)
       .last_step_count = 0,
       .acc_step_count = 0
@@ -1896,6 +1897,7 @@ uint32_t Stepper::block_phase_isr() {
               else {
                 laser_trap.till_update = LASER_POWER_INLINE_TRAPEZOID_CONT_PER;
                 laser_trap.cur_power = (current_block->laser.power * acc_step_rate) / current_block->nominal_rate;
+                TERN_(LASER_POWER_INLINE_DOT_ALWAYS_VISIBLE, NOLESS(laser_trap.cur_power, laser_trap.min_power)); // Keep laser dot visible
                 cutter.set_ocr_power(laser_trap.cur_power); // Cycle efficiency is irrelevant it the last line was many cycles
               }
             #endif
@@ -1973,6 +1975,7 @@ uint32_t Stepper::block_phase_isr() {
               else {
                 laser_trap.till_update = LASER_POWER_INLINE_TRAPEZOID_CONT_PER;
                 laser_trap.cur_power = (current_block->laser.power * step_rate) / current_block->nominal_rate;
+                TERN_(LASER_POWER_INLINE_DOT_ALWAYS_VISIBLE, NOLESS(laser_trap.cur_power, laser_trap.min_power)); // Keep laser dot visible
                 cutter.set_ocr_power(laser_trap.cur_power); // Cycle efficiency isn't relevant when the last line was many cycles
               }
             #endif
@@ -2001,6 +2004,7 @@ uint32_t Stepper::block_phase_isr() {
           if (laser_trap.enabled) {
             if (!laser_trap.cruise_set) {
               laser_trap.cur_power = current_block->laser.power;
+              TERN_(LASER_POWER_INLINE_DOT_ALWAYS_VISIBLE, NOLESS(laser_trap.cur_power, laser_trap.min_power)); // Keep laser dot visible
               cutter.set_ocr_power(laser_trap.cur_power);
               laser_trap.cruise_set = true;
             }
@@ -2206,6 +2210,7 @@ uint32_t Stepper::block_phase_isr() {
         #if ENABLED(LASER_POWER_INLINE_TRAPEZOID)
           laser_trap.enabled = stat.isPlanned && stat.isEnabled;
           laser_trap.cur_power = current_block->laser.power_entry; // RESET STATE
+          TERN_(LASER_POWER_INLINE_DOT_ALWAYS_VISIBLE, NOLESS(laser_trap.cur_power, laser_trap.min_power)); // Keep laser dot visible
           laser_trap.cruise_set = false;
           #if DISABLED(LASER_POWER_INLINE_TRAPEZOID_CONT)
             laser_trap.last_step_count = 0;

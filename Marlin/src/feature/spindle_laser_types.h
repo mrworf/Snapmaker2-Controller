@@ -35,14 +35,16 @@
 #endif
 #define MSG_CUTTER(M) _MSG_CUTTER(M)
 
-typedef IF<(SPEED_POWER_MAX > 255), uint16_t, uint8_t>::type cutter_cpower_t;
+/* typedef IF<(SPEED_POWER_MAX > 255), uint16_t, uint8_t>::type cutter_cpower_t; */
 
 #if CUTTER_UNIT_IS(RPM) && SPEED_POWER_MAX > 255
   typedef uint16_t cutter_power_t;
   #define CUTTER_MENU_POWER_TYPE uint16_5
   #define cutter_power2str       ui16tostr5rj
 #else
-  typedef float cutter_power_t;
+  typedef float cutter_cpower_t;
+  typedef float cutter_upower_t;
+  typedef uint8_t cutter_opower_t;
   #define CUTTER_MENU_POWER_TYPE float
   /* #define cutter_power2str       ui8tostr3rj */
 #endif

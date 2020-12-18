@@ -194,7 +194,7 @@ void GcodeSuite::get_destination_from_command() {
     bool seenP = parser.seenval('P'); // which will be P if present
     if (seenS || seenP) {
       const float spwr = parser.value_float() * (seenP ? 1.0f : 100.0f / 255.0f);
-      cutter.inline_power(TERN(SPINDLE_LASER_PWM, cutter.upower_to_ocr(cutter.power_to_range(cutter_power_t(spwr))), spwr > 0 ? 255 : 0));
+      cutter.inline_power(TERN(SPINDLE_LASER_PWM, cutter.upower_to_ocr(cutter.power_to_range(cutter_upower_t(spwr))), spwr > 0 ? 255 : 0));
     }
     else if (ENABLED(LASER_MOVE_G0_OFF) && parser.codenum == 0) // G0
       cutter.set_inline_enabled(false);

@@ -121,7 +121,7 @@ void ToolHeadLaser::TurnOn(uint16_t pwm) {
     return;
 
   state_ = TOOLHEAD_LASER_STATE_ON;
-  CheckFan(pwm);
+  // CheckFan(pwm); Call at time of gcode parsing, not from ISR
   TimSetPwm(pwm);
 }
 
@@ -131,7 +131,7 @@ void ToolHeadLaser::TurnOff() {
     return;
 
   state_ = TOOLHEAD_LASER_STATE_OFF;
-  CheckFan(0);
+  // CheckFan(0); Call at time of gcode parsing, not from ISR
   TimSetPwm(0);
 }
 
