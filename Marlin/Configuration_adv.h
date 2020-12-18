@@ -3018,6 +3018,20 @@
       #define LASER_POWER_INLINE_TRAPEZOID_CONT_PER 0
 
       /**
+       * LASER_POWER_INLINE_DOT_ALWAYS_VISIBLE will keep the laser dot visible at a safe power level
+       * for alignment purposes and tracking.
+       */
+      #define LASER_POWER_INLINE_DOT_ALWAYS_VISIBLE
+
+      #if ENABLED(LASER_POWER_INLINE_DOT_ALWAYS_VISIBLE)
+        /**
+         * Calculated laser power during acceleration and deceleration less than the configured value will be replaced
+         * with the configured value.
+         */
+        #define LASER_POWER_INLINE_TRAPEZOID_MINIMUM_POWER SPEED_POWER_SAFE_LIMIT
+      #endif
+
+      /**
        * Include laser power in G0/G1/G2/G3/G5 commands with the 'S' parameter
        */
       #define LASER_MOVE_POWER

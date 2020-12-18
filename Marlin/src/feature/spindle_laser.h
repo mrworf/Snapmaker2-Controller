@@ -47,7 +47,7 @@ static_assert(CUTTER_UNIT_IS(PERCENT), "Unsupported unit");
 class SpindleLaser {
 public:
   static constexpr float min_pct = 0, max_pct = 100;
-  static uint8_t pct_to_ocr(const float pct) {
+  static cutter_opower_t pct_to_ocr(const cutter_upower_t pct) {
     if (laser.IsOnline()) {
       int   integer;
       float decimal;
@@ -55,22 +55,22 @@ public:
       integer = (int)pct;
       decimal = pct - integer;
 
-      return (uint8_t)(power_table[integer] + (power_table[integer + 1] - power_table[integer]) * decimal);
+      return (cutter_opower_t)(power_table[integer] + (power_table[integer + 1] - power_table[integer]) * decimal);
 
-      //  return pct <= 1 ? uint8_t(round(pct * 20)) : 20 + uint8_t(round((pct-1) * 235 / 99));
+      //  return pct <= 1 ? cutter_opower_t(round(pct * 20)) : 20 + cutter_opower_t(round((pct-1) * 235 / 99));
     }
-    return uint8_t(round(pct));
+    return cutter_opower_t(round(pct));
   }
 
   // Convert a configured value (cpower)(ie SPEED_POWER_STARTUP) to unit power (upwr, upower),
   // which can be PWM, Percent, or RPM (rel/abs).
   // In the Snapmaker case we always use Percent values anyway.
-  static constexpr inline cutter_power_t cpwr_to_upwr(const cutter_cpower_t cpwr) { return cpwr; } // STARTUP power to Unit power
+  static constexpr inline cutter_upower_t cpwr_to_upwr(const cutter_cpower_t cpwr) { return cpwr; } // STARTUP power to Unit power
 
   static bool isReady;                    // Ready to apply power setting from the UI to OCR
-  static uint8_t power, power_limit;
+  static cutter_opower_t power, power_limit;
 
-  static cutter_power_t menuPower,        // Power as set via LCD menu in PWM, Percentage or RPM
+  static cutter_upower_t menuPower,        // Power as set via LCD menu in PWM, Percentage or RPM
                         unitPower;        // Power as displayed status in PWM, Percentage or RPM
 
   static void init() {
@@ -78,15 +78,22 @@ public:
   }
 
   // Modifying this function should update everywhere
-  static inline bool enabled(const cutter_power_t opwr) { return opwr > 0; }
+  static inline bool enabled(const cutter_opower_t opwr) { return opwr > 0; }
   static inline bool enabled() { return enabled(power); }
 
-  static void apply_power(const uint8_t inpow);
+  static void apply_power(const cutter_opower_t inpow);
 
   FORCE_INLINE static void refresh() { apply_power(power); }
-  FORCE_INLINE static void set_power(const uint8_t upwr) { power = upwr; refresh(); }
+  FORCE_INLINE static void set_power(const cutter_opower_t upwr) { 
+    if (laser.IsOnline())
+      laser.CheckFan(upwr); // Set fan at time of gcode parsing, outside ISR
 
-  FORCE_INLINE static void set_power_limit(cutter_power_t new_limit = SPEED_POWER_SAFE_LIMIT) {
+    power = upwr;
+    inline_ocr_power(upwr);
+    refresh();
+  }
+
+  FORCE_INLINE static void set_power_limit(cutter_upower_t new_limit = SPEED_POWER_SAFE_LIMIT) {
     power_limit = upower_to_ocr(new_limit);
     if (enabled()) set_ocr(power);
   }
@@ -94,24 +101,24 @@ public:
 
   #if ENABLED(SPINDLE_LASER_PWM)
 
-    static void set_ocr(uint8_t ocr);
-    static inline void set_ocr_power(const uint8_t ocr) { power = ocr; set_ocr(ocr); }
+    static void set_ocr(cutter_opower_t ocr);
+    static inline void set_ocr_power(const cutter_opower_t ocr) { power = ocr; set_ocr(ocr); }
     static void ocr_off();
     // Used to update output for power->OCR translation
-    static inline uint8_t upower_to_ocr(const cutter_power_t upwr) {
+    static inline cutter_opower_t upower_to_ocr(const cutter_upower_t upwr) {
       return (
         #if CUTTER_UNIT_IS(PWM255)
-          uint8_t(upwr)
+          cutter_opower_t(upwr)
         #elif CUTTER_UNIT_IS(PERCENT)
           pct_to_ocr(upwr)
         #else
-          uint8_t(pct_to_ocr(cpwr_to_pct(upwr)))
+          cutter_opower_t(pct_to_ocr(cpwr_to_pct(upwr)))
         #endif
       );
     }
 
     // Correct power to configured range
-    static inline cutter_power_t power_to_range(const cutter_power_t pwr) {
+    static inline cutter_upower_t power_to_range(const cutter_upower_t pwr) {
       return power_to_range(pwr, (
         #if CUTTER_UNIT_IS(PWM255)
           0
@@ -124,7 +131,7 @@ public:
         #endif
       ));
     }
-    static inline cutter_power_t power_to_range(const cutter_power_t pwr, const uint8_t pwrUnit) {
+    static inline cutter_upower_t power_to_range(const cutter_upower_t pwr, const uint8_t pwrUnit) {
       if (pwr <= 0) return 0;
       auto toolhead = ModuleBase::toolhead();
       if (pwrUnit == 0 && toolhead == MODULE_TOOLHEAD_LASER && pwr >= 255) return 255;
@@ -156,7 +163,7 @@ public:
 
     static inline void enable_with_dir(const bool reverse) {
       isReady = true;
-      const uint8_t ocr = TERN(SPINDLE_LASER_PWM, upower_to_ocr(menuPower), 255);
+      const cutter_opower_t ocr = TERN(SPINDLE_LASER_PWM, upower_to_ocr(menuPower), 255);
       if (menuPower)
         power = ocr;
       else
@@ -205,7 +212,7 @@ public:
     }
 
     // Set the power for subsequent movement blocks
-    static void inline_power(const cutter_power_t upwr) {
+    static void inline_power(const cutter_opower_t upwr) {
       unitPower = menuPower = upwr;
       laser.CheckFan(upwr); // Prevent turning on the fan from the ISR initially.
       #if ENABLED(SPINDLE_LASER_PWM)
@@ -226,7 +233,7 @@ public:
     static inline void inline_direction(const bool) { /* never */ }
 
     #if ENABLED(SPINDLE_LASER_PWM)
-      static inline void inline_ocr_power(const cutter_power_t ocrpwr) {
+      static inline void inline_ocr_power(const cutter_opower_t ocrpwr) {
         isReady = ocrpwr > 0;
         planner.laser_inline.status.isEnabled = ocrpwr > 0;
         planner.laser_inline.power = ocrpwr;

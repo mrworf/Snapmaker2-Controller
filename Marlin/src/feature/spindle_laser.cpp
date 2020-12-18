@@ -34,7 +34,7 @@ SpindleLaser cutter;
 uint8_t SpindleLaser::power;
 uint8_t SpindleLaser::power_limit;
 bool SpindleLaser::isReady;                                           // Ready to apply power setting from the UI to OCR
-cutter_power_t SpindleLaser::menuPower,                               // Power set via LCD menu in PWM, PERCENT, or RPM
+cutter_upower_t SpindleLaser::menuPower,                               // Power set via LCD menu in PWM, PERCENT, or RPM
                SpindleLaser::unitPower;                               // LCD status power in PWM, PERCENT, or RPM
 
 /**

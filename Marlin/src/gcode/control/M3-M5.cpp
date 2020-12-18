@@ -73,7 +73,7 @@ void GcodeSuite::M3_M4(const bool is_M4) {
     if (seenS || seenP) {
       const float spwr = parser.value_float() * (seenP ? 1.0f : 100.0f / 255.0f);
       cutter.unitPower = TERN(SPINDLE_LASER_PWM,
-                              cutter.power_to_range(cutter_power_t(spwr)),
+                              cutter.power_to_range(cutter_upower_t(spwr)),
                               spwr > 0 ? 255 : 0);
     }
     else
