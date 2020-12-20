@@ -245,7 +245,7 @@ xyze_int8_t Stepper::count_direction{0};
     .enabled = false,
     .cur_power = 0,
     .cruise_set = false,
-    .min_power = TERN0(LASER_POWER_INLINE_DOT_ALWAYS_VISIBLE, cutter.upower_to_ocr(cutter.cpwr_to_upwr(LASER_POWER_INLINE_TRAPEZOID_MINIMUM_POWER))),
+    .min_power = 0,
     #if DISABLED(LASER_POWER_INLINE_TRAPEZOID_CONT)
       .last_step_count = 0,
       .acc_step_count = 0
@@ -2210,6 +2210,7 @@ uint32_t Stepper::block_phase_isr() {
         #if ENABLED(LASER_POWER_INLINE_TRAPEZOID)
           laser_trap.enabled = stat.isPlanned && stat.isEnabled;
           laser_trap.cur_power = current_block->laser.power_entry; // RESET STATE
+          laser_trap.min_power = TERN0(LASER_POWER_INLINE_DOT_ALWAYS_VISIBLE, cutter.upower_to_ocr(cutter.cpwr_to_upwr(LASER_POWER_INLINE_TRAPEZOID_MINIMUM_POWER)));
           TERN_(LASER_POWER_INLINE_DOT_ALWAYS_VISIBLE, NOLESS(laser_trap.cur_power, laser_trap.min_power)); // Keep laser dot visible
           laser_trap.cruise_set = false;
           #if DISABLED(LASER_POWER_INLINE_TRAPEZOID_CONT)
