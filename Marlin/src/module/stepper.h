@@ -365,7 +365,7 @@ class Stepper {
         bool enabled;       // Trapezoid needed flag (i.e., laser on, planner in control)
         cutter_opower_t cur_power;  // Current laser power
         bool cruise_set;    // Power set up for cruising?
-        uint8_t min_power; // Minimum power is visible dot?
+        cutter_opower_t min_power; // Minimum power is visible dot?
 
         #if DISABLED(LASER_POWER_INLINE_TRAPEZOID_CONT)
           uint32_t last_step_count, // Step count from the last update

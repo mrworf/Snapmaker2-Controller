@@ -78,6 +78,8 @@ void GcodeSuite::M3_M4(const bool is_M4) {
     }
     else
       cutter.unitPower = cutter.cpwr_to_upwr(SPEED_POWER_STARTUP);
+
+    cutter.menuPower = cutter.unitPower;
     return cutter.unitPower;
   };
 
@@ -124,6 +126,7 @@ void GcodeSuite::M5() {
   #if ENABLED(LASER_POWER_INLINE)
     if (parser.seen('I') == DISABLED(LASER_POWER_INLINE_INVERT)) {
       cutter.set_inline_enabled(false); // Laser power in inline mode
+      cutter.menuPower = cutter.unitPower;
       return;
     }
     // Non-inline, standard case
