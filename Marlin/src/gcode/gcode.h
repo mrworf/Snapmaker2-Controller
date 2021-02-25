@@ -532,6 +532,9 @@ private:
   static void M106();
   static void M107();
 
+  static void M7_M8();
+  static void M9();
+
   #if DISABLED(EMERGENCY_PARSER)
     static void M108();
     static void M112();
