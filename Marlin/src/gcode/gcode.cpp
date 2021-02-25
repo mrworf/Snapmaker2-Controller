@@ -421,6 +421,9 @@ void GcodeSuite::execute_command(void) {
       //#if FAN_COUNT > 0
         case 106: M106(); break;                                  // M106: Fan On
         case 107: M107(); break;                                  // M107: Fan Off
+        case 7: M7_M8(); break;                                   // M7: Fan On (coolant emulation)
+        case 8: M7_M8(); break;                                   // M8: Fan On (coolant emulation)
+        case 9: M9(); break;                                      // M9: Fan Off (coolant emulation)
       //#endif
 
       #if ENABLED(PARK_HEAD_ON_PAUSE)
