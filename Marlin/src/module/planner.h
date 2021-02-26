@@ -74,6 +74,16 @@ enum BlockFlag : char {
   BLOCK_FLAG_SYNC_POSITION        = _BV(BLOCK_BIT_SYNC_POSITION)
 };
 
+typedef struct {
+  bool isEnabled:1;
+} laser_power_status_t;
+
+typedef struct {
+  laser_power_status_t status;
+  uint16_t power;            // When in trapezoid mode this is nominal power
+  uint16_t power_entry;      // Entry power for the laser
+} block_inline_laser_t;
+
 /**
  * struct block_t
  *
@@ -159,11 +169,24 @@ typedef struct block_t {
 
   uint32_t filePos;                       // position of gcode of this block in the file
 
+  block_inline_laser_t laser;
+
 } block_t;
 
 #define HAS_POSITION_FLOAT ANY(LIN_ADVANCE, SCARA_FEEDRATE_SCALING, GRADIENT_MIX)
 
 #define BLOCK_MOD(n) ((n)&(BLOCK_BUFFER_SIZE-1))
+
+typedef struct {
+  /**
+   * Laser status flags
+   */
+  laser_power_status_t status;
+  /**
+   * Laser power: 0 to 255;
+   */
+  uint16_t power;
+} laser_state_t;
 
 typedef struct {
   uint32_t max_acceleration_mm_per_s2[X_TO_EN],  // (mm/s^2) M201 XYZE
@@ -238,6 +261,8 @@ class Planner {
     #endif
 
     static planner_settings_t settings;
+
+    static laser_state_t laser_inline;
 
     static uint32_t max_acceleration_steps_per_s2[X_TO_EN]; // (steps/s^2) Derived from mm_per_s2
     static float steps_to_mm[X_TO_EN];          // Millimeters per step
@@ -553,12 +578,12 @@ class Planner {
     FORCE_INLINE static block_t* get_next_free_block(uint8_t &next_buffer_head, const uint8_t count=1) {
 
       // Wait until there are enough slots free
-      while (moves_free() < count) 
+      while (moves_free() < count)
       {
         //if request quick stop
-        if(cleaning_buffer_counter) 
+        if(cleaning_buffer_counter)
           return NULL;
-        idle(); 
+        idle();
       }
 
       // Return the first available block
@@ -712,8 +737,8 @@ class Planner {
      * conversions are applied.
      */
     static void set_machine_position_mm(const float &x, const float &y, const float &z, const float &b, const float &e);
-    FORCE_INLINE static void set_machine_position_mm(const float (&target)[X_TO_E]) { 
-      set_machine_position_mm(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[B_AXIS], target[E_AXIS]); 
+    FORCE_INLINE static void set_machine_position_mm(const float (&target)[X_TO_E]) {
+      set_machine_position_mm(target[X_AXIS], target[Y_AXIS], target[Z_AXIS], target[B_AXIS], target[E_AXIS]);
     }
 
     /**
