@@ -85,7 +85,7 @@ ErrCode Enclosure::SetLightBar(uint8_t brightness) {
   buffer[2] = brightness;
   buffer[3] = brightness;
 
-  LOG_I("Eclosure: set FAN speed %u\n", brightness);
+  LOG_I("Eclosure: set LIGHTBAR brightness %u\n", brightness);
 
   cmd.id     = MODULE_FUNC_SET_ENCLOSURE_LIGHT;
   cmd.data   = buffer;
@@ -147,7 +147,7 @@ void Enclosure::PollDoorState() {
 void Enclosure::Disable() {
   LOG_I("disable door checking!\n");
   enabled_ = false;
-  if (event_state_ == ENCLOSURE_EVENT_STATE_HANDLED_OPEN &&
+  if (event_state_ == ENCLOSURE_EVENT_STATE_HANDLED_OPEN ||
       event_state_ == ENCLOSURE_EVENT_STATE_OPENED) {
     HandleDoorClosed();
     event_state_ = ENCLOSURE_EVENT_STATE_IDLE;
