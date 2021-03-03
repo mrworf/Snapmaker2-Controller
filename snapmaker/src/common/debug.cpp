@@ -135,8 +135,13 @@ void SnapDebug::Log(SnapDebugLevel level, const char *fmt, ...) {
 
   va_end(args);
 
-  if (level >= pc_msg_level)
+  if (level >= pc_msg_level) {
+    if (level >= SNAP_DEBUG_LEVEL_ERROR)
+      CONSOLE_OUTPUT("error: ");
+    else
+      CONSOLE_OUTPUT("echo: ");
     CONSOLE_OUTPUT(log_buf + 2);
+  }
 
   if (level >= sc_msg_level)
     SendLog2Screen(level);
